@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     console.log(`Processing ${mode} request for message: ${message}`);
     
     // Get the API URL from environment
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ;
     
     // Handle based on mode
     if (mode === 'research') {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       };
       
       // Call the chat API
-      console.log(`Calling API at ${apiUrl}/api/query`);
+      console.log(`Calling API at ${apiUrl}`);
       console.log(`Request body: ${JSON.stringify(requestBody)}`);
       
       const response = await fetch(`${apiUrl}/api/query`, {
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
     const researchId = searchParams.get('research_id');
     const threadId = searchParams.get('thread_id');
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ai-assistant-api-dpelezos-projects.vercel.app';
     
     // Handle research status check
     if (researchId) {
