@@ -5,6 +5,12 @@ A Next.js chat interface for the [AI Assistant API](https://github.com/dpelezo/A
 - **Live demo:** [ai-assistant-frontend-beta.vercel.app](https://ai-assistant-frontend-beta.vercel.app)
 - **Backend:** [AI-Assistant-API](https://github.com/dpelezo/AI-Assistant-API) (FastAPI, LangGraph, Claude, Exa)
 
+![Home screen with Search and Deep research modes](docs/screenshots/home.png)
+
+![Search mode answering a question with live web results, rendered as Markdown](docs/screenshots/answer.png)
+
+*Live demo, November 23, 2026. Figures in the answer come from web search at that time.*
+
 ## How it works
 
 ```mermaid
