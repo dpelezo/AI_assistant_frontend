@@ -1,226 +1,78 @@
 # AI Assistant Frontend
 
-A modern, responsive React frontend built with Next.js 15 that provides an intuitive chat interface for the AI Assistant API. Features real-time conversation management, web search integration, and deep research capabilities with a clean, accessible UI.
+A Next.js chat interface for the [AI Assistant API](https://github.com/dpelezo/AI-Assistant-API): ask a question in **Search** mode for a quick answer backed by web search, or in **Deep research** mode for a multi-step research report.
 
-## Features
+- **Live demo:** [ai-assistant-frontend-beta.vercel.app](https://ai-assistant-frontend-beta.vercel.app)
+- **Backend:** [AI-Assistant-API](https://github.com/dpelezo/AI-Assistant-API) (FastAPI, LangGraph, Claude, Exa)
 
-- **Modern React Architecture**: Built with Next.js 15 and React 19 for optimal performance
-- **Real-time Chat Interface**: Seamless conversation experience with the AI Assistant
-- **Deep Research UI**: Interactive interface for multi-iteration research workflows  
-- **Responsive Design**: Mobile-first design that works across all devices
-- **Accessible Components**: Built with Radix UI primitives for accessibility
-- **TypeScript Support**: Full type safety throughout the application
-- **Optimized Performance**: Turbopack for fast development and optimized builds
-- **Modern Styling**: Tailwind CSS with custom animations and themes
+## How it works
 
-## Tech Stack
-
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 4 with custom animations
-- **UI Components**: Radix UI primitives
-- **Icons**: Lucide React
-- **AI Integration**: Vercel AI SDK
-- **Development**: Turbopack for fast builds
-
-## Project Structure
-
-```
-├── app/                    # Next.js App Router
-│   ├── globals.css         # Global styles and Tailwind imports
-│   ├── layout.tsx          # Root layout component
-│   └── page.tsx            # Home page component
-├── components/             # Reusable UI components
-│   ├── ui/                 # Base UI components (buttons, inputs, etc.)
-│   ├── chat/               # Chat-specific components
-│   └── research/           # Research interface components
-├── lib/                    # Utility functions and configurations
-│   ├── utils.ts            # Common utility functions
-│   └── api.ts              # API client configuration
-├── hooks/                  # Custom React hooks
-├── types/                  # TypeScript type definitions
-└── public/                 # Static assets
+```mermaid
+flowchart LR
+    B["Browser: ChatInterface"] -->|"POST /api/chat"| R["Next.js route handler<br/>app/api/chat/route.ts"]
+    B -->|"poll GET /api/chat"| R
+    R -->|"POST /api/query, GET /api/thread/{id}"| API["AI Assistant API"]
+    R -->|"POST /api/research/query, GET status and result"| API
 ```
 
-## Getting Started
+1. The browser only talks to this app's own route, `app/api/chat/route.ts`. That route calls the backend, so the backend URL stays in one place.
+2. **Search mode:** the route sends the question to `POST /api/query`. The page then polls for the reply through `GET /api/chat?thread_id=...`.
+3. **Deep research mode:** the route starts `POST /api/research/query` (3 iterations). The page polls `GET /api/chat?research_id=...` until the report is ready, then formats the search queries and findings into a report.
 
-### Prerequisites
+## Tech stack
 
-- Node.js 18+ 
-- npm, yarn, pnpm, or bun
-- AI Assistant Backend API running (see backend README)
+- Next.js 15 (App Router) and React 19, TypeScript
+- Tailwind CSS 4, with shadcn/ui-style components built on Radix UI
+- Lucide icons
 
-### Environment Variables
+## Known limitations
 
-Create a `.env.local` file in the root directory:
+- **No sign-in.** The "Sign In" and "Sign Up" links in the header are placeholders.
+- **No attachments.** The attachment (+) button in the message box does nothing yet.
+- **No memory in Search mode.** Each Search question starts a new thread, so follow-up questions do not see earlier answers.
+- **No tests or CI yet.**
 
-```env
-# Backend API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+## Run it locally
 
-# Optional: Analytics and monitoring
-# NEXT_PUBLIC_ANALYTICS_ID=your_analytics_id
-```
-
-### Installation & Development
+Prerequisites: Node.js 18.18 or newer, and the [backend](https://github.com/dpelezo/AI-Assistant-API) running locally or deployed.
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd ai-assistant-frontend
-
-# Install dependencies
+git clone https://github.com/dpelezo/AI_assistant_frontend.git
+cd AI_assistant_frontend
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-
-# Start the development server
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+npm run dev    # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_API_URL` | Base URL of the AI Assistant API, without `/api`. If it is unset, polling falls back to the deployed backend. |
 
-### Building for Production
+Other scripts: `npm run build`, `npm run start` and `npm run lint`.
 
-```bash
-# Build the application
-npm run build
+## Deploy
 
-# Start the production server
-npm run start
+The live demo runs on Vercel. To deploy your own copy, import the repository in Vercel, set `NEXT_PUBLIC_API_URL` to your backend URL, and deploy. On the backend, add your front-end URL to `BACKEND_CORS_ORIGINS`.
 
-# Lint the codebase
-npm run lint
+## Project structure
+
 ```
-
-## API Integration
-
-The frontend connects to the AI Assistant Backend API with the following endpoints:
-
-### Chat Features
-- **Real-time Messaging**: Send queries and receive AI responses
-- **Thread Management**: Maintain conversation context across messages
-- **Web Search Integration**: Display search results and sources
-
-### Research Features  
-- **Deep Research**: Initiate comprehensive research processes
-- **Progress Tracking**: Monitor research status in real-time
-- **Results Display**: Present research findings with proper formatting
-
-### Configuration
-
-Update the API base URL in your environment variables to match your backend deployment:
-
-```env
-# For local development
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# For production
-NEXT_PUBLIC_API_URL=https://your-api-domain.com
+app/
+├── api/chat/route.ts       # proxies chat and research requests to the backend
+├── layout.tsx              # header and page shell
+├── page.tsx                # renders ChatInterface
+└── globals.css
+components/
+├── chat-interface.tsx      # state, sending, polling, research report formatting
+├── chat-message.tsx        # one message bubble
+├── message-input.tsx       # text box and Search / Deep research toggle
+└── ui/                     # avatar, button, card, textarea
+lib/
+├── types.ts                # message and chat state types
+└── utils.ts                # className helper
+public/                     # logo and icons
 ```
-
-## Key Components
-
-### Chat Interface
-- Message bubbles with proper formatting
-- Loading states and typing indicators  
-- Source citations and links
-- Error handling and retry mechanisms
-
-### Research Dashboard
-- Research query input with validation
-- Progress visualization and status updates
-- Comprehensive results presentation
-- Export and sharing capabilities
-
-### UI Components
-- Accessible form controls using Radix UI
-- Consistent design system with Tailwind CSS
-- Smooth animations and transitions
-- Responsive layouts for all screen sizes
-
-## Development Guidelines
-
-### Component Structure
-```typescript
-// Example component structure
-interface ComponentProps {
-  // Define prop types
-}
-
-export function Component({ ...props }: ComponentProps) {
-  // Component logic
-  return (
-    // JSX with proper TypeScript types
-  );
-}
-```
-
-### Styling Guidelines
-- Use Tailwind CSS utility classes
-- Follow mobile-first responsive design
-- Implement proper hover and focus states
-- Maintain consistent spacing and typography
-
-### API Integration
-```typescript
-// Use the configured API client
-import { apiClient } from '@/lib/api';
-
-const response = await apiClient.post('/query', {
-  message: userInput,
-  thread_id: threadId
-});
-```
-
-## Deployment
-
-### Vercel (Recommended)
-The easiest way to deploy is using the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme):
-
-1. Connect your GitHub repository
-2. Configure environment variables
-3. Deploy with automatic builds on push
-
-### Other Platforms
-- **Netlify**: Configure build command as `npm run build`
-- **Docker**: Use the provided Dockerfile for containerized deployment
-- **Static Export**: Run `npm run build` for static site generation
-
-## Browser Support
-
-- Chrome 90+
-- Firefox 88+  
-- Safari 14+
-- Edge 90+
-
-## Contributing
-
-1. Follow the existing code style and patterns
-2. Add TypeScript types for all new components
-3. Include proper error handling and loading states
-4. Test responsive design across different screen sizes
-5. Update documentation for new features
-
-## Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
-- [React Documentation](https://react.dev) - Learn React concepts and patterns  
-- [Tailwind CSS](https://tailwindcss.com/docs) - Utility-first CSS framework
-- [Radix UI](https://www.radix-ui.com/) - Accessible component primitives
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript language guide
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2025 Domingos Pelezo
