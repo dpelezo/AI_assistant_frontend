@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-assistant-api-dpelezos-projects.vercel.app';
+
+// Shown to visitors. Details stay in the server logs.
+const UNREACHABLE = "I couldn't reach the assistant service. Please try again in a moment.";
+const RESEARCH_FAILED = "Sorry, the research could not be completed. Please try again.";
+
 // Define the types for our requests and responses
 type ChatRequestBody = {
   message: string;
@@ -11,10 +17,7 @@ export async function POST(request: Request) {
   try {
     // Parse the request body
     const { message, threadId, mode = 'search' } = await request.json() as ChatRequestBody;
-    console.log(`Processing ${mode} request for message: ${message}`);
-    
-    // Get the API URL from environment
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ;
+    const apiUrl = API_URL;
     
     // Handle based on mode
     if (mode === 'research') {
@@ -74,8 +77,6 @@ export async function POST(request: Request) {
       };
       
       // Call the chat API
-      console.log(`Calling API at ${apiUrl}`);
-      console.log(`Request body: ${JSON.stringify(requestBody)}`);
       
       const response = await fetch(`${apiUrl}/api/query`, {
         method: 'POST',
@@ -91,7 +92,6 @@ export async function POST(request: Request) {
       
       // Get the response
       const data = await response.json();
-      console.log(`Received response from chat API: ${JSON.stringify(data)}`);
       
       // Ensure the 'ai' role is changed to 'assistant' for consistency
       if (data.messages) {
@@ -108,10 +108,7 @@ export async function POST(request: Request) {
     }
   } catch (error: any) {
     console.error('Error in chat API route:', error);
-    return NextResponse.json(
-      { error: error.message || 'An error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: UNREACHABLE }, { status: 502 });
   }
 }
 
@@ -123,7 +120,7 @@ export async function GET(request: Request) {
     const researchId = searchParams.get('research_id');
     const threadId = searchParams.get('thread_id');
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ai-assistant-api-dpelezos-projects.vercel.app';
+    const apiUrl = API_URL;
     
     // Handle research status check
     if (researchId) {
@@ -164,7 +161,6 @@ export async function GET(request: Request) {
         // Debug the full research data if report is missing
         if (!researchData.report) {
           console.error('No report found in research data');
-          console.log('Full research data:', JSON.stringify(researchData));
           
           return NextResponse.json({
             thread_id: researchId,
@@ -209,12 +205,12 @@ export async function GET(request: Request) {
         return NextResponse.json({
           thread_id: researchId,
           status: 'error',
-          error: 'Research failed to complete',
+          error: statusData.error || RESEARCH_FAILED,
           messages: [
             {
               role: "assistant",
-              content: "Sorry, I encountered an error while researching that topic.",
-              isError: true
+              content: statusData.error || RESEARCH_FAILED,
+              is_error: true
             }
           ]
         });
@@ -276,9 +272,6 @@ export async function GET(request: Request) {
     }
   } catch (error: any) {
     console.error('Error handling GET request:', error);
-    return NextResponse.json(
-      { error: error.message || 'An error occurred' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: UNREACHABLE }, { status: 502 });
   }
 }

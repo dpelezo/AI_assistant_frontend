@@ -24,7 +24,7 @@ export type Message = {
   export type ResearchData = {
     search_queries: string[];
     iterations: number;
-    contexts: number;
+    contexts?: string[];
   };
   
   export type ChatState = {
@@ -40,7 +40,9 @@ export type Message = {
       role: string;
       content: string;
       tool_calls?: ToolCall[];
+      is_error?: boolean;
     }[];
+    error?: string;
     research_data?: ResearchData;
     status?: 'in_progress' | 'completed' | 'error';
     research_id?: string;
