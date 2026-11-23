@@ -17,17 +17,18 @@ flowchart LR
 
 1. The browser only talks to this app's own route, `app/api/chat/route.ts`. That route calls the backend, so the backend URL stays in one place.
 2. **Search mode:** the route sends the question to `POST /api/query`. The page then polls for the reply through `GET /api/chat?thread_id=...`.
-3. **Deep research mode:** the route starts `POST /api/research/query` (3 iterations). The page polls `GET /api/chat?research_id=...` until the report is ready, then formats the search queries and findings into a report.
+3. **Deep research mode:** the route starts `POST /api/research/query` (3 iterations). The page polls `GET /api/chat?research_id=...` until the report is ready.
+4. Replies are rendered as Markdown (headings, lists, links, tables). If anything fails, the visitor sees a short notice in a red bubble; details stay in the server logs.
 
 ## Tech stack
 
 - Next.js 15 (App Router) and React 19, TypeScript
 - Tailwind CSS 4, with shadcn/ui-style components built on Radix UI
+- react-markdown with GitHub-flavored Markdown for replies
 - Lucide icons
 
 ## Known limitations
 
-- **No sign-in.** The "Sign In" and "Sign Up" links in the header are placeholders.
 - **No attachments.** The attachment (+) button in the message box does nothing yet.
 - **No memory in Search mode.** Each Search question starts a new thread, so follow-up questions do not see earlier answers.
 - **No tests, linting or CI yet.**
@@ -46,7 +47,7 @@ npm run dev    # http://localhost:3000
 
 | Variable | Purpose |
 |----------|---------|
-| `NEXT_PUBLIC_API_URL` | Base URL of the AI Assistant API, without `/api`. If it is unset, polling falls back to the deployed backend. |
+| `NEXT_PUBLIC_API_URL` | Base URL of the AI Assistant API, without `/api`. If it is unset, the app uses the deployed backend. |
 
 Other scripts: `npm run build` and `npm run start`. ESLint is not configured yet, so `npm run lint` asks you to set it up.
 
@@ -63,8 +64,9 @@ app/
 ├── page.tsx                # renders ChatInterface
 └── globals.css
 components/
-├── chat-interface.tsx      # state, sending, polling, research report formatting
+├── chat-interface.tsx      # state, sending and polling for replies
 ├── chat-message.tsx        # one message bubble
+├── markdown.tsx            # styled Markdown rendering for replies
 ├── message-input.tsx       # text box and Search / Deep research toggle
 └── ui/                     # avatar, button, card, textarea
 lib/
