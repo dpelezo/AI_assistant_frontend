@@ -30,7 +30,7 @@ flowchart LR
 - **No sign-in.** The "Sign In" and "Sign Up" links in the header are placeholders.
 - **No attachments.** The attachment (+) button in the message box does nothing yet.
 - **No memory in Search mode.** Each Search question starts a new thread, so follow-up questions do not see earlier answers.
-- **No tests or CI yet.**
+- **No tests, linting or CI yet.**
 
 ## Run it locally
 
@@ -48,7 +48,7 @@ npm run dev    # http://localhost:3000
 |----------|---------|
 | `NEXT_PUBLIC_API_URL` | Base URL of the AI Assistant API, without `/api`. If it is unset, polling falls back to the deployed backend. |
 
-Other scripts: `npm run build`, `npm run start` and `npm run lint`.
+Other scripts: `npm run build` and `npm run start`. ESLint is not configured yet, so `npm run lint` asks you to set it up.
 
 ## Deploy
 
