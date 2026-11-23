@@ -38,7 +38,7 @@ export function MessageInput({ onSend, isLoading }: MessageInputProps) {
     <div className="w-full">
       <form onSubmit={handleSubmit} className="relative">
         <Textarea
-          placeholder="Ask anything"
+          placeholder={mode === 'research' ? "What should I research?" : "Ask anything"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -58,7 +58,7 @@ export function MessageInput({ onSend, isLoading }: MessageInputProps) {
           </Button>
         </div>
         
-        <div className="absolute right-3 bottom-6">
+        <div className="absolute right-2 bottom-2">
           <Button
             type="submit"
             size="icon"
